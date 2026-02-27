@@ -63,4 +63,3 @@ model ItemPedido {
 
     @@map("item_pedido")
 }
-
