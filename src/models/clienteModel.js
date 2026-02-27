@@ -1,19 +1,34 @@
 import prisma from '../utils/prismaClient.js';
 
-export default class ClienteModel {
-    constructor({ id = null, nome = null, estatus = true, preco = null } = {}) {
+// Cliente
+export default class Cliente {
+    constructor({ id = null, nome = null, telefone = null, email = null, cpf = null, cep = null, logradouro = null, bairro = null, localidade = null, uf = null, ativo = true } = {}) {
         this.id = id;
         this.nome = nome;
-        this.estatus = estatus;
-        this.preco = preco;
+        this.telefone = telefone;
+        this.email = email;
+        this.cpf = cpf;
+        this.cep = cep;
+        this.logradouro = logradouro;
+        this.bairro = bairro;
+        this.localidade = localidade;
+        this.uf = uf;
+        this.ativo = ativo;
     }
 
     async criar() {
         return prisma.cliente.create({
             data: {
                 nome: this.nome,
-                estatus: this.estatus,
-                preco: this.preco,
+                telefone: this.telefone,
+                email: this.email,
+                cpf: this.cpf,
+                cep: this.cep,
+                logradouro: this.logradouro,
+                bairro: this.bairro,
+                localidade: this.localidade,
+                uf: this.uf,
+                ativo: this.ativo
             },
         });
     }
@@ -21,7 +36,7 @@ export default class ClienteModel {
     async atualizar() {
         return prisma.cliente.update({
             where: { id: this.id },
-            data: { nome: this.nome, estatus: this.estatus, preco: this.preco },
+            data: { nome: this.nome, telefone: this.telefone, email: this.email, cpf: this.cpf, cep: this.cep, logradouro: this.logradouro, bairro: this.bairro, localidade: this.localidade, uf: this.uf, ativo: this.ativo},
         });
     }
 
@@ -29,19 +44,26 @@ export default class ClienteModel {
         return prisma.cliente.delete({ where: { id: this.id } });
     }
 
+    // GetAll
     static async buscarTodos(filtros = {}) {
         const where = {};
 
+        // Filtra por nome (case insensitive)
         if (filtros.nome) where.nome = { contains: filtros.nome, mode: 'insensitive' };
-        if (filtros.estatus !== undefined) where.estatus = filtros.estatus === 'true';
-        if (filtros.preco !== undefined) where.preco = parseFloat(filtros.preco);
+
+        // Filtra por CPF
+        if (filtros.cpf) where.cpf = filtros.cpf;
+
+        // Filtra por ativo (true or false)
+        if (filtros.ativo !== undefined) where.ativo = filtros.ativo === 'true';
 
         return prisma.cliente.findMany({ where });
     }
 
+    // GetById
     static async buscarPorId(id) {
         const data = await prisma.cliente.findUnique({ where: { id } });
         if (!data) return null;
-        return new ClienteModel(data);
+        return new Cliente(data);
     }
 }
