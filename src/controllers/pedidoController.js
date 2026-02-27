@@ -8,7 +8,7 @@ export const criar = async (req, res) => {
 
         const { clienteId, total, status, criadoEm } = req.body;
 
-        const pedido = new pedidoModel({ nome, estatus, preco: parseFloat(preco) });
+        const pedido = new pedidoModel({ clienteId, total, status, criadoEm: Date(criadoEm) });
         const data = await pedido.criar();
 
         res.status(201).json({ message: 'Registro criado com sucesso!', data });
@@ -105,7 +105,10 @@ export const deletar = async (req, res) => {
 
         await pedido.deletar();
 
-        res.json({ message: `O registro "${pedido.nome}" foi deletado com sucesso!`, deletado: pedido });
+        res.json({ message: `O registro "${pedido.clienteId}" foi deletado com sucesso!`, deletado: pedido });
+        res.json({ message: `O registro "${pedido.total}" foi deletado com sucesso!`, deletado: pedido });
+        res.json({ message: `O registro "${pedido.criadoEm}" foi deletado com sucesso!`, deletado: pedido });
+        res.json({ message: `O registro "${pedido.status}" foi deletado com sucesso!`, deletado: pedido });
     } catch (error) {
         console.error('Erro ao deletar:', error);
         res.status(500).json({ error: 'Erro ao deletar registro.' });

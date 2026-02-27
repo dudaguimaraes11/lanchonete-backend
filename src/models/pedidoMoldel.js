@@ -1,7 +1,7 @@
 import prisma from '../utils/prismaClient.js';
 
 export default class ExemploModel {
-    constructor({ id = null, nome = null, estatus = true, preco = null } = {}) {
+    constructor({ id = null, clienteId = null, status = "ABERTO", total = null, criadoEm } = {}) {
         this.id = id;
         this.nome = nome;
         this.estatus = estatus;
