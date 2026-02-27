@@ -18,6 +18,8 @@ model Cliente {
     localidade String?
     uf         String?
     ativo      Boolean @default(true)
+    pedidos    Pedido[]
+
 
     @@map("cliente")
 }
@@ -44,6 +46,7 @@ model Pedido {
     total     Decimal  @db.Decimal(10, 2)
     status    Status   @default(ABERTO)
     criadoEm  DateTime @default(now())
+    cliente   Cliente  @relation(fields: [clienteId], references: [id])
 
     @@map("pedido")
 }
@@ -63,4 +66,3 @@ model ItemPedido {
 
     @@map("item_pedido")
 }
-
