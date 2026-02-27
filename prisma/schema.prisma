@@ -7,17 +7,17 @@ datasource db {
 }
 
 model Cliente {
-    id          Int     @id @default(autoincrement())
-    nome        String
-    telefone    String  @unique
-    email       String  @unique
-    cpf         String  @unique
-    cep         String
-    logradouro  String?
-    bairro      String?
-    localidade  String?
-    uf          String?
-    ativo       Boolean  @default(true)
+    id         Int     @id @default(autoincrement())
+    nome       String
+    telefone   String  @unique
+    email      String  @unique
+    cpf        String  @unique
+    cep        String
+    logradouro String?
+    bairro     String?
+    localidade String?
+    uf         String?
+    ativo      Boolean @default(true)
 
     @@map("cliente")
 }
@@ -30,23 +30,22 @@ enum Categoria {
 }
 
 model Produto {
-    id          Int      @id @default(autoincrement())
-    nome        String   @unique
-    descricao   String?
-    categoria   Categoria
-    preco       Decimal  @db.Decimal(10,2)
-    disponivel  Boolean  @default(true)
+    id         Int       @id @default(autoincrement())
+    nome       String    @unique
+    descricao  String?
+    categoria  Categoria
+    preco      Decimal   @db.Decimal(10, 2)
+    disponivel Boolean   @default(true)
 }
 
-
 model Pedido {
-    id              Int             @id @default(autoincrement())
-    clienteId       Int
-    total           Decimal         @db.Decimal(10, 2)
-    status          Status          @Default("ABERTO")
-    criadoEm        DateTime        @default(now())
+    id        Int      @id @default(autoincrement())
+    clienteId Int
+    total     Decimal  @db.Decimal(10, 2)
+    status    Status   @default(ABERTO)
+    criadoEm  DateTime @default(now())
 
-       @@map("pedido")
+    @@map("pedido")
 }
 
 enum Status {
@@ -56,11 +55,12 @@ enum Status {
 }
 
 model ItemPedido {
-    id              Int     @id @default(autoincrement())
-    pedidoId        Int
-    produtoId       Int
-    quantidade      Int
-    precoUnitario   Decimal @db.Decimal(10, 2)
+    id            Int     @id @default(autoincrement())
+    pedidoId      Int
+    produtoId     Int
+    quantidade    Int
+    precoUnitario Decimal @db.Decimal(10, 2)
 
     @@map("item_pedido")
 }
+
