@@ -6,10 +6,12 @@ export const criar = async (req, res) => {
             return res.status(400).json({ error: 'Corpo da requisição vazio. Envie os dados!' });
         }
 
-        const { nome, telefone, email ,cpf,cep,logradouro,bairro,localidade,uf,ativo} = req.body;
+        const { nome, telefone, email, cpf, cep, logradouro, bairro, localidade, uf, ativo } =
+            req.body;
 
         if (!nome) return res.status(400).json({ error: 'O campo "nome" é obrigatório!' });
-        if (!telefone === undefined || telefone === null) return res.status(400).json({ error: 'O campo "telefone" é obrigatório!' });
+        if (!telefone === undefined || telefone === null)
+            return res.status(400).json({ error: 'O campo "telefone" é obrigatório!' });
         if (!email === undefined || email === null)
             return res.status(400).json({ error: 'O campo "email" é obrigatório!' });
         if (!cpf === undefined || cpf === null)
@@ -35,7 +37,7 @@ export const criar = async (req, res) => {
             bairro,
             localidade,
             uf,
-            ativo
+            ativo,
         });
         const data = await cliente.criar();
 
@@ -97,16 +99,6 @@ export const atualizar = async (req, res) => {
         if (!cliente) {
             return res.status(404).json({ error: 'Registro não encontrado para atualizar.' });
         }
-        // nome,
-            telefone,
-            email,
-            cpf,
-            cep,
-            logradouro,
-            bairro,
-            localidade,
-            uf,
-            ativo
 
         if (req.body.nome !== undefined) cliente.nome = req.body.nome;
         if (req.body.telefone !== undefined) cliente.telefone = req.body.telefone;
@@ -118,7 +110,6 @@ export const atualizar = async (req, res) => {
         if (req.body.localidade !== undefined) cliente.localidade = req.body.localidade;
         if (req.body.uf !== undefined) cliente.uf = req.body.uf;
         if (req.body.ativo !== undefined) cliente.ativo = req.body.ativo;
-
 
         const data = await cliente.atualizar();
 
@@ -135,15 +126,18 @@ export const deletar = async (req, res) => {
 
         if (isNaN(id)) return res.status(400).json({ error: 'ID inválido.' });
 
-        const exemplo = await ClienteModel.buscarPorId(parseInt(id));
+        const cliente = await ClienteModel.buscarPorId(parseInt(id));
 
-        if (!exemplo) {
+        if (!cliente) {
             return res.status(404).json({ error: 'Registro não encontrado para deletar.' });
         }
 
-        await exemplo.deletar();
+        await cliente.deletar();
 
-        res.json({ message: `O registro "${exemplo.nome}" foi deletado com sucesso!`, deletado: exemplo });
+        res.json({
+            message: `O registro "${cliente.nome}" foi deletado com sucesso!`,
+            deletado: cliente,
+        });
     } catch (error) {
         console.error('Erro ao deletar:', error);
         res.status(500).json({ error: 'Erro ao deletar registro.' });
