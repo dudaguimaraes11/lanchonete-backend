@@ -6,11 +6,61 @@ datasource db {
     provider = "postgresql"
 }
 
-model Exemplo {
-    id        Int      @id @default(autoincrement())
-    nome      String?
-    estatus   Boolean  @default(true)
-    preco     Decimal  @db.Decimal(10, 2)
+model Cliente {
+    id          Int     @id @default(autoincrement())
+    nome        String
+    telefone    String  @unique
+    email       String  @unique
+    cpf         String  @unique
+    cep         String
+    logradouro  String?
+    bairro      String?
+    localidade  String?
+    uf          String?
+    ativo       Boolean  @default(true)
 
-    @@map("exemplo")
+    @@map("cliente")
+}
+
+enum Categoria {
+    LANCHE
+    BEBIDA
+    SOBREMESA
+    COMBO
+}
+
+model Produto {
+    id          Int      @id @default(autoincrement())
+    nome        String   @unique
+    descricao   String?
+    categoria   Categoria
+    preco       Decimal  @db.Decimal(10,2)
+    disponivel  Boolean  @default(true)
+}
+
+
+model Pedido {
+    id              Int             @id @default(autoincrement())
+    clienteId       Int
+    total           Decimal         @db.Decimal(10, 2)
+    status          Status          @Default("ABERTO")
+    criadoEm        DateTime        @default(now())
+
+       @@map("pedido")
+}
+
+enum Status {
+    ABERTO
+    PAGO
+    CANCELADO
+}
+
+model ItemPedido {
+    id              Int     @id @default(autoincrement())
+    pedidoId        Int
+    produtoId       Int
+    quantidade      Int
+    precoUnitario   Decimal @db.Decimal(10, 2)
+
+    @@map("item_pedido")
 }
