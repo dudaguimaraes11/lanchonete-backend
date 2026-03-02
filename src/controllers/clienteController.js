@@ -54,9 +54,6 @@ if (cep) {
 // GET
 export const buscarTodos = async (req, res) => {
     try {
-        if (Object.keys(req.query).length === 0) {
-            return res.status(400).json({ erro: 'Informe pelo menos um parâmetro para filtro.' });
-        }
 
         const registros = await ClienteModel.buscarTodos(req.query);
 

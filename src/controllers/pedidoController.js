@@ -1,4 +1,4 @@
-import pedidoModel from '../models/pedidoMoldel.js';
+import pedidoModel from '../models/pedidoModel.js';
 
 export const criar = async (req, res) => {
     try {
