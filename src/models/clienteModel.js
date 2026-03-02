@@ -7,7 +7,7 @@ export default class Cliente {
         this.nome = nome;
         this.telefone = telefone;
         this.email = email;
-        this.cpf = cpf;
+        this.cpf = cpf ? String(cpf) : null;
         this.cep = cep;
         this.logradouro = logradouro;
         this.bairro = bairro;
@@ -15,6 +15,27 @@ export default class Cliente {
         this.uf = uf;
         this.ativo = ativo;
     }
+
+async validacao(isUpdate = false) {
+    if (!this.cpf || this.cpf.length !== 11) {
+            throw new Error('Cpf deve ter 11 digitos')
+    }
+    if (!this.cep || this.cep.length !== 8) {
+        throw new Error('Cep deve ter 8 digitos');
+    }
+    const cpfExistente = await prisma.cliente.findMany({
+        where: { cpf: this.cpf, id: isUpdate ? { not:this.id}: undefined}
+    })
+    if (cpfExistente) {
+        throw new Error('este cpf ja foi cadastrado');
+    }
+    const telExistente = await prisma.cliente.findMany({
+        where: { cpf: this.telefone, id: isUpdate ? { not:this.id}: undefined}
+    })
+    if (telExistente) {
+        throw new Error('este telefone ja foi cadastrado');}
+    }
+
 
     async criar() {
         return prisma.cliente.create({
