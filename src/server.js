@@ -14,6 +14,7 @@ app.get('/', (req, res) => {
 // Rotas
 app.use('/api', exemplosRoutes);
 
+
 app.use((req, res) => {
     res.status(404).json({ error: 'Rota não encontrada' });
 });
