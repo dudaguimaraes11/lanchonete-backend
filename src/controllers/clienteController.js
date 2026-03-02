@@ -1,4 +1,4 @@
-import ClienteModel from './models/ClienteModel.js';
+import ClienteModel from '../models/clienteModel.js';
 import fetch from 'node-fetch';
 
 const buscarEnderecoPorCep = async (cep) => {
