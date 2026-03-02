@@ -33,7 +33,11 @@ async validacao(isUpdate = false) {
         where: { cpf: this.telefone, id: isUpdate ? { not:this.id}: undefined}
     })
     if (telExistente) {
-        throw new Error('este telefone ja foi cadastrado');}
+        throw new Error('este telefone ja foi cadastrado');
+    }
+    if (!this.logradouro || !this.localidade || !this.uf) {
+        throw new Error('dados de endereço insuficiente. Por favor verifique o cep')
+    }
     }
 
 
@@ -62,6 +66,17 @@ async validacao(isUpdate = false) {
     }
 
     async deletar() {
+        if (!this.id) throw new Error('id necessario para deletar')
+
+        const pedidoAberto = await prisma.pedido.findMany({
+            where: {
+                clienteId: this.id,
+                ativo: 'aberto'
+            }
+        });
+        if (pedidoAberto) {
+            throw new error('Não e possivel deletar um cliente que possui um pedido em aberto')
+        }
         return prisma.cliente.delete({ where: { id: this.id } });
     }
 
@@ -78,7 +93,7 @@ async validacao(isUpdate = false) {
         // Filtra por ativo (true or false)
         if (filtros.ativo !== undefined) where.ativo = filtros.ativo === 'true';
 
-        
+
         return prisma.cliente.findMany({ where });
     }
 
