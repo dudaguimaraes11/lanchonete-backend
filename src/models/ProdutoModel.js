@@ -18,7 +18,14 @@ export default class Produto {
         this.disponivel = disponivel;
     }
 
+    validarPreco() {
+        if (this.preco <= 0) {
+            throw new Error('O preco do produto deve ser maior que 0');
+        }
+    }
+
     async criar() {
+        this.validarPreco();
         return prisma.produto.create({
             data: {
                 nome: this.nome,
@@ -31,6 +38,7 @@ export default class Produto {
     }
 
     async atualizar() {
+        this.validarPreco();
         return prisma.produto.update({
             where: { id: this.id },
             data: {
@@ -44,9 +52,24 @@ export default class Produto {
     }
 
     async deletar() {
-        return prisma.produto.delete({ where: { id: this.id } });
-    }
+        const pedidosVinculados = await prisma.pedido.findMany({
+            where: {
+                produtos: {
+                    some: { id: this.id },
+                },
+                status: 'ABERtO',
+            },
+        });
 
+        if (pedidosVinculados.length > 0) {
+            throw new Error(
+                'Não é possivel deletar o produto porque ele esta vinculada a um pedido ABERTO',
+            );
+        }
+
+        return prisma.produtos.delete({ where: { id: this.id } });
+    }
+    
     // GetAll
     static async buscarTodos(filtros = {}) {
         const where = {};
