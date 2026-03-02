@@ -24,15 +24,21 @@ async validacao(isUpdate = false) {
         throw new Error('Cep deve ter 8 digitos');
     }
     const cpfExistente = await prisma.cliente.findMany({
-        where: { cpf: this.cpf, id: isUpdate ? { not:this.id}: undefined}
-    })
-    if (cpfExistente) {
+        where: {
+            cpf: this.cpf,
+            ...(isUpdate && { id: { not: this.id } }),
+        },
+    });
+    if (cpfExistente.length > 0) {
         throw new Error('este cpf ja foi cadastrado');
     }
     const telExistente = await prisma.cliente.findMany({
-        where: { cpf: this.telefone, id: isUpdate ? { not:this.id}: undefined}
+        where: {
+            telefone: this.telefone,
+            ...(isUpdate && {id: {not: this.id}})
+        }
     })
-    if (telExistente) {
+    if (telExistente.length > 0) {
         throw new Error('este telefone ja foi cadastrado');
     }
     if (!this.logradouro || !this.localidade || !this.uf) {
@@ -68,11 +74,11 @@ async validacao(isUpdate = false) {
     async deletar() {
         if (!this.id) throw new Error('id necessario para deletar')
 
-        const pedidoAberto = await prisma.pedido.findMany({
+        const pedidoAberto = await prisma.pedido.findFirst({
             where: {
                 clienteId: this.id,
-                ativo: 'aberto'
-            }
+                ativo: 'aberto',
+            },
         });
         if (pedidoAberto) {
             throw new error('Não e possivel deletar um cliente que possui um pedido em aberto')
