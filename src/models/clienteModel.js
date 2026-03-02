@@ -78,6 +78,7 @@ async validacao(isUpdate = false) {
         // Filtra por ativo (true or false)
         if (filtros.ativo !== undefined) where.ativo = filtros.ativo === 'true';
 
+        
         return prisma.cliente.findMany({ where });
     }
 
