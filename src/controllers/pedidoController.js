@@ -16,13 +16,6 @@ export const criar = async (req, res) => {
         console.error('Erro ao criar:', error);
         res.status(500).json({ error: 'Erro interno ao salvar o registro.' });
     }
-
-    return await prisma.pedido.criar({
-        data: {
-            clienteId,
-            status: 'ABERTO' || 'Aberto' || 'aberto',
-        },
-    });
 };
 
 export const buscarTodos = async (req, res) => {

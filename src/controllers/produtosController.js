@@ -1,4 +1,4 @@
-import produtosModel from '../models/produtosModel.js';
+import produtosModel from '../models/ProdutoModel.js';
 
 export const criar = async (req, res) => {
     try {
