@@ -7,7 +7,7 @@ export default class Cliente {
         this.nome = nome;
         this.telefone = telefone;
         this.email = email;
-        this.cpf = cpf;
+        this.cpf = cpf ? String(cpf) : null;
         this.cep = cep;
         this.logradouro = logradouro;
         this.bairro = bairro;
@@ -15,6 +15,37 @@ export default class Cliente {
         this.uf = uf;
         this.ativo = ativo;
     }
+
+async validacao(isUpdate = false) {
+    if (!this.cpf || this.cpf.length !== 11) {
+            throw new Error('Cpf deve ter 11 digitos')
+    }
+    if (!this.cep || this.cep.length !== 8) {
+        throw new Error('Cep deve ter 8 digitos');
+    }
+    const cpfExistente = await prisma.cliente.findMany({
+        where: {
+            cpf: this.cpf,
+            ...(isUpdate && { id: { not: this.id } }),
+        },
+    });
+    if (cpfExistente.length > 0) {
+        throw new Error('este cpf ja foi cadastrado');
+    }
+    const telExistente = await prisma.cliente.findMany({
+        where: {
+            telefone: this.telefone,
+            ...(isUpdate && {id: {not: this.id}})
+        }
+    })
+    if (telExistente.length > 0) {
+        throw new Error('este telefone ja foi cadastrado');
+    }
+    if (!this.logradouro || !this.localidade || !this.uf) {
+        throw new Error('dados de endereço insuficiente. Por favor verifique o cep')
+    }
+    }
+
 
     async criar() {
         return prisma.cliente.create({
@@ -41,6 +72,17 @@ export default class Cliente {
     }
 
     async deletar() {
+        if (!this.id) throw new Error('id necessario para deletar')
+
+        const pedidoAberto = await prisma.pedido.findFirst({
+            where: {
+                clienteId: this.id,
+                ativo: 'aberto',
+            },
+        });
+        if (pedidoAberto) {
+            throw new error('Não e possivel deletar um cliente que possui um pedido em aberto')
+        }
         return prisma.cliente.delete({ where: { id: this.id } });
     }
 
@@ -56,6 +98,7 @@ export default class Cliente {
 
         // Filtra por ativo (true or false)
         if (filtros.ativo !== undefined) where.ativo = filtros.ativo === 'true';
+
 
         return prisma.cliente.findMany({ where });
     }

@@ -1,5 +1,4 @@
-import produtosModel from '../models/produtosModel.js';
-
+import produtosModel from '../models/ProdutoModel.js';
 
 export const criar = async (req, res) => {
     try {
@@ -13,7 +12,7 @@ export const criar = async (req, res) => {
 
         if (preco === undefined || preco === null) return res.status(400).json({ error: 'O campo "preco" é obrigatório!' });
 
-       
+
         const produtos = new produtosModel({
             nome,
             descricao,
