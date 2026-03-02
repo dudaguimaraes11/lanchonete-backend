@@ -1,4 +1,3 @@
-import { parse } from 'dotenv';
 import itemPedidoModel from '../models/itemPedidoModel.js';
 
 export const criar = async (req, res) => {

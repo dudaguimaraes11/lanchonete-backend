@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
     provider = "postgresql"
+    
 }
 
 model Cliente {
@@ -12,14 +13,14 @@ model Cliente {
     telefone   String  @unique
     email      String  @unique
     cpf        String  @unique
-    cep        String
+    cep        String? @db.VarChar(8)
     logradouro String?
     bairro     String?
     localidade String?
     uf         String?
     ativo      Boolean @default(true)
-    pedidos    Pedido[]
 
+    pedidos Pedido[]
 
     @@map("cliente")
 }
@@ -38,6 +39,8 @@ model Produto {
     categoria  Categoria
     preco      Decimal   @db.Decimal(10, 2)
     disponivel Boolean   @default(true)
+
+    itens ItemPedido[]
 }
 
 model Pedido {
@@ -46,7 +49,9 @@ model Pedido {
     total     Decimal  @db.Decimal(10, 2)
     status    Status   @default(ABERTO)
     criadoEm  DateTime @default(now())
-    cliente   Cliente  @relation(fields: [clienteId], references: [id])
+
+    cliente Cliente      @relation(fields: [clienteId], references: [id])
+    itens   ItemPedido[]
 
     @@map("pedido")
 }
@@ -63,6 +68,9 @@ model ItemPedido {
     produtoId     Int
     quantidade    Int
     precoUnitario Decimal @db.Decimal(10, 2)
+
+    pedido  Pedido  @relation(fields: [pedidoId], references: [id])
+    produto Produto @relation(fields: [produtoId], references: [id])
 
     @@map("item_pedido")
 }

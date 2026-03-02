@@ -57,19 +57,20 @@ export default class Produto {
                 produtos: {
                     some: { id: this.id },
                 },
-                status: 'ABERtO',
+                status: 'ABERO',
             },
         });
 
         if (pedidosVinculados.length > 0) {
-            throw new Error(
-                'Não é possivel deletar o produto porque ele esta vinculada a um pedido ABERTO',
+             throw new Error(
+                'Não é possível deletar o produto porque ele está vinculado a um pedido ABERTO',
             );
         }
 
+
         return prisma.produtos.delete({ where: { id: this.id } });
     }
-    
+
     // GetAll
     static async buscarTodos(filtros = {}) {
         const where = {};
