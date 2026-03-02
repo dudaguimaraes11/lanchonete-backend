@@ -1,4 +1,12 @@
-import ClienteModel from '../models/ClienteModel.js';
+import { response } from 'express';
+
+import ClienteModel from './models/ClienteModel.js';
+
+const buscarEnderecoPorCep = async (cep) => {
+    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await response.json();
+    return data.erro ? null : data;
+};
 
 export const criar = async (req, res) => {
     try {
@@ -8,34 +16,48 @@ export const criar = async (req, res) => {
 
         const { nome, telefone, email, cpf, cep, logradouro, bairro, localidade, uf, ativo } =
             req.body;
-
+        let endereco = {};
         if (!nome) return res.status(400).json({ error: 'O campo "nome" é obrigatório!' });
         if (!telefone === undefined || telefone === null)
             return res.status(400).json({ error: 'O campo "telefone" é obrigatório!' });
         if (!email === undefined || email === null)
             return res.status(400).json({ error: 'O campo "email" é obrigatório!' });
-        if (!cpf === undefined || cpf === null)
+        if (!cpf)
             return res.status(400).json({ error: 'O campo "cpf" é obrigatório!' });
-        if (!cep === undefined || cep === null)
-            return res.status(400).json({ error: 'O campo "cep" é obrigatório!' });
-        if (!logradouro === undefined || logradouro === null)
+        if (cep) {
+            const endereco = await buscarEnderecoPorCep(cep);
+            if (endereco) {
+                logradouro = endereco.logradouro || logradouro;
+                bairro = endereco.bairro || bairro;
+                localidade = endereco.localidade || localidade;
+                uf = endereco.uf || uf;
+            } else {
+                return res.status(400).json({ error: 'CEP inválido ou não encontrado.' });
+            }
+        }
+
+        if (!logradouro)
             return res.status(400).json({ error: 'O campo "logradouro" é obrigatório!' });
-        if (!bairro === undefined || bairro === null)
+
+        if (!bairro )
             return res.status(400).json({ error: 'O campo "bairro" é obrigatório!' });
-        if (!localidade === undefined || localidade === null)
+
+        if (!localidade)
             return res.status(400).json({ error: 'O campo "localidade" é obrigatório!' });
-        if (!uf === undefined || uf === null)
+
+        if (!uf)
             return res.status(400).json({ error: 'O campo "uf" é obrigatório!' });
+
 
         const cliente = new ClienteModel({
             nome,
             telefone,
             email,
-            cpf,
+            cpf:String(cpf),
             cep,
-            logradouro,
-            bairro,
-            localidade,
+            logradouro: endereco.logradouro,
+            bairro: endereco.bairro,
+            localidade: endereco.localidade,
             uf,
             ativo,
         });
@@ -103,7 +125,7 @@ export const atualizar = async (req, res) => {
         if (req.body.nome !== undefined) cliente.nome = req.body.nome;
         if (req.body.telefone !== undefined) cliente.telefone = req.body.telefone;
         if (req.body.email !== undefined) cliente.email = req.body.email;
-        if (req.body.cpf !== undefined) cliente.cpf = parseFloat(req.body.cpf);
+        if (req.body.cpf !== undefined) cliente.cpf = (req.body.cpf);
         if (req.body.cep !== undefined) cliente.cep = req.body.cep;
         if (req.body.logradouro !== undefined) cliente.logradouro = req.body.logradouro;
         if (req.body.bairro !== undefined) cliente.bairro = req.body.bairro;
