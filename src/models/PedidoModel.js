@@ -77,4 +77,23 @@ export default class Pedido {
             where: { id: this.id },
         });
     }
+     static async buscarTodos(filtros = {}) {
+        const pedidos = await prisma.pedido.findMany({
+            where: filtros
+        });
+        
+        return pedidos.map(p => new Pedido(p));
+    }
+    async atualizar() {
+        if (!this.id) throw new Error('ID necessário para atualização.');
+        return prisma.pedido.update({
+            where: { id: this.id },
+            data: {
+                clienteId: this.clienteId,
+                total: this.total,
+                status: this.status,
+                criadoEm: this.criadoEm
+            },
+        });
+    }
 }
