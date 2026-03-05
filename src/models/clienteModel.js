@@ -71,23 +71,45 @@ async validacao(isUpdate = false) {
         });
     }
 
-   async deletar() {
-    if (!this.id) throw new Error('id necessario para deletar');
+async deletar() {
+    try {
 
-    const pedidoAberto = await prisma.pedido.findFirst({
-        where: {
-            clienteId: this.id,
-            status: "ABERTO"
+        if (!this.id) {
+            throw new Error('id necessario para deletar');
         }
-    });
 
-    if (pedidoAberto) {
-        throw new Error('Não é possível deletar um cliente que possui um pedido em aberto');
+        const pedidoAberto = await prisma.pedido.findFirst({
+            where: {
+                clienteId: this.id,
+                status: "ABERTO"
+            }
+        });
+
+        if (pedidoAberto) {
+            throw new Error('Não é possível deletar um cliente que possui um pedido em aberto');
+        }
+
+        const pedidoPago = await prisma.pedido.findFirst({
+            where: {
+                clienteId: this.id,
+                status: "PAGO"
+            }
+        });
+
+        if (pedidoPago) {
+            throw new Error('Não é possível deletar um cliente que possui um pedido pago');
+        }
+
+        // pedidos cancelados não bloqueiam o delete
+
+        return await prisma.cliente.delete({
+            where: { id: this.id }
+        });
+
+    } catch (error) {
+        console.error("Erro ao deletar cliente:", error.message);
+        throw error;
     }
-
-    return prisma.cliente.delete({
-        where: { id: this.id }
-    });
 }
 
     // GetAll
