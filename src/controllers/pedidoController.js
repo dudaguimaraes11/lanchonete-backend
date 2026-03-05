@@ -1,19 +1,33 @@
 import pedidoModel from '../models/PedidoModel.js';
+import prisma from '../utils/prismaClient.js';
 
 export const criar = async (req, res) => {
     try {
-        if (!req.body) {
-            return res.status(400).json({ error: 'Corpo da requisição vazio. Envie os dados!' });
+        if (!req.body || !req.body.clienteId) {
+            return res.status(400).json({ error: 'Dados insuficientes.' });
         }
 
-        const { clienteId, total, status, criadoEm } = req.body;
+        const { clienteId, criadoEm } = req.body;
 
-        const pedido = new pedidoModel({ clienteId, total, status, criadoEm: Date(criadoEm) });
+        const cliente = await prisma.cliente.findUnique({
+            where: { id: Number(clienteId) }
+        });
+
+        if (!cliente || cliente.ativo !== true) {
+            return res.status(403).json({ error: 'Cliente inexistente ou inativo.' });
+        }
+
+        const pedido = new pedidoModel({ 
+            clienteId: Number(clienteId), 
+            total: 0, 
+            status: 'ABERTO', 
+            criadoEm: criadoEm ? new Date(criadoEm) : new Date() 
+        });
+
         const data = await pedido.criar();
 
         res.status(201).json({ message: 'Registro criado com sucesso!', data });
     } catch (error) {
-        console.error('Erro ao criar:', error);
         res.status(500).json({ error: 'Erro interno ao salvar o registro.' });
     }
 };
@@ -21,14 +35,11 @@ export const criar = async (req, res) => {
 export const buscarTodos = async (req, res) => {
     try {
         const registros = await pedidoModel.buscarTodos(req.query);
-
         if (!registros || registros.length === 0) {
             return res.status(200).json({ message: 'Nenhum registro encontrado.' });
         }
-
         res.json(registros);
     } catch (error) {
-        console.error('Erro ao buscar:', error);
         res.status(500).json({ error: 'Erro ao buscar registros.' });
     }
 };
@@ -36,20 +47,15 @@ export const buscarTodos = async (req, res) => {
 export const buscarPorId = async (req, res) => {
     try {
         const { id } = req.params;
-
         if (isNaN(id)) {
-            return res.status(400).json({ error: 'O ID enviado não é um número válido.' });
+            return res.status(400).json({ error: 'ID inválido.' });
         }
-
         const pedido = await pedidoModel.buscarPorId(parseInt(id));
-
         if (!pedido) {
             return res.status(404).json({ error: 'Registro não encontrado.' });
         }
-
         res.json({ data: pedido });
     } catch (error) {
-        console.error('Erro ao buscar:', error);
         res.status(500).json({ error: 'Erro ao buscar registro.' });
     }
 };
@@ -67,14 +73,11 @@ export const atualizar = async (req, res) => {
         if (req.body.criadoEm !== undefined) pedido.criadoEm = new Date(req.body.criadoEm);
 
         const data = await pedido.atualizar();
-
         res.json({ message: `Pedido ID ${id} atualizado com sucesso!`, data });
     } catch (error) {
-        console.error('Erro ao atualizar:', error);
         res.status(500).json({ error: 'Erro ao atualizar registro.' });
     }
 };
-
 
 export const deletar = async (req, res) => {
     try {
@@ -84,8 +87,7 @@ export const deletar = async (req, res) => {
         if (!pedido) return res.status(404).json({ error: 'Registro não encontrado.' });
 
         await pedido.deletar();
-
-                res.json({ 
+        res.json({ 
             message: `Pedido do cliente ${pedido.clienteId} deletado com sucesso!`,
             detalhes: { id, total: pedido.total, status: pedido.status }
         });
