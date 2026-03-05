@@ -59,8 +59,8 @@ export const criar = async (req, res) => {
     return res.status(201).json(data);
 
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ erro: "Erro ao criar cliente." });
+    console.error("ERRO DETECTADO:", e.message);
+    return res.status(400).json({ erro: e.message }); 
   }
 };
 
@@ -75,10 +75,10 @@ export const buscarTodos = async (req, res) => {
     }
 
     return res.status(200).json(registros);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ erro: "Erro ao buscar clientes." });
-  }
+} catch (e) {
+    console.error(e);
+    return res.status(500).json({ erro: "Erro interno no servidor ao buscar dados." });
+}
 };
 
 // GetById
@@ -144,9 +144,9 @@ export const atualizar = async (req, res) => {
     if (!data) return res.status(404).json({ erro: "Cliente não encontrado." });
 
     return res.status(200).json(data);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ erro: "Erro ao atualizar cliente." });
+ } catch (e) {
+    console.error(e);
+    return res.status(400).json({ erro: e.message }); 
   }
 };
 
