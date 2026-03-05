@@ -34,7 +34,7 @@ export default class Pedido {
         });
 
         const novoTotal = itens.reduce((soma, item) => {
-            return soma + item.preco * item.quantidade;
+            return soma + (Number(item.preco) * item.quantidade);
         }, 0);
 
         return prisma.pedido.update({
