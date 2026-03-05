@@ -1,4 +1,4 @@
-import pedidoModel from '../models/pedidoModel.js';
+import pedidoModel from '../models/PedidoModel.js';
 
 export const criar = async (req, res) => {
     try {
@@ -56,54 +56,40 @@ export const buscarPorId = async (req, res) => {
 
 export const atualizar = async (req, res) => {
     try {
-        const { id } = req.params;
-
-        if (isNaN(id)) return res.status(400).json({ error: 'ID inválido.' });
-
-        if (!req.body) {
-            return res.status(400).json({ error: 'Corpo da requisição vazio. Envie os dados!' });
-        }
-
+       const { id } = req.params;
         const pedido = await pedidoModel.buscarPorId(parseInt(id));
 
-        if (!pedido) {
-            return res.status(404).json({ error: 'Registro não encontrado para atualizar.' });
-        }
+        if (!pedido) return res.status(404).json({ error: 'Registro não encontrado.' });
 
-        if (req.body.cliente.id !== undefined) pedido.clienteId = req.body.clienteId;
+        if (req.body.clienteId !== undefined) pedido.clienteId = req.body.clienteId;
         if (req.body.total !== undefined) pedido.total = req.body.total;
         if (req.body.status !== undefined) pedido.status = req.body.status;
-        if (req.body.criadoEm !== undefined) pedido.criadoEm = Date(req.body.criadoEm);
+        if (req.body.criadoEm !== undefined) pedido.criadoEm = new Date(req.body.criadoEm);
 
         const data = await pedido.atualizar();
 
-        res.json({ message: `O registro "${data.nome}" foi atualizado com sucesso!`, data });
+        res.json({ message: `Pedido ID ${id} atualizado com sucesso!`, data });
     } catch (error) {
         console.error('Erro ao atualizar:', error);
         res.status(500).json({ error: 'Erro ao atualizar registro.' });
     }
 };
 
+
 export const deletar = async (req, res) => {
     try {
         const { id } = req.params;
-
-        if (isNaN(id)) return res.status(400).json({ error: 'ID inválido.' });
-
         const pedido = await pedidoModel.buscarPorId(parseInt(id));
 
-        if (!pedido) {
-            return res.status(404).json({ error: 'Registro não encontrado para deletar.' });
-        }
+        if (!pedido) return res.status(404).json({ error: 'Registro não encontrado.' });
 
         await pedido.deletar();
 
-        res.json({ message: `O registro "${pedido.clienteId}" foi deletado com sucesso!`, deletado: pedido });
-        res.json({ message: `O registro "${pedido.total}" foi deletado com sucesso!`, deletado: pedido });
-        res.json({ message: `O registro "${pedido.criadoEm}" foi deletado com sucesso!`, deletado: pedido });
-        res.json({ message: `O registro "${pedido.status}" foi deletado com sucesso!`, deletado: pedido });
+                res.json({ 
+            message: `Pedido do cliente ${pedido.clienteId} deletado com sucesso!`,
+            detalhes: { id, total: pedido.total, status: pedido.status }
+        });
     } catch (error) {
-        console.error('Erro ao deletar:', error);
         res.status(500).json({ error: 'Erro ao deletar registro.' });
     }
 };

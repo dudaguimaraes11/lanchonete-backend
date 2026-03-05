@@ -10,9 +10,8 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("🌱 Iniciando seed...");
+    console.log('🌱 Iniciando seed...');
 
-  // limpa tabelas
   await prisma.$executeRawUnsafe(`
     TRUNCATE TABLE "item_pedido", "pedido", "cliente", "Produto"
     RESTART IDENTITY CASCADE;
@@ -133,7 +132,7 @@ async function main() {
     ],
   });
 
-  console.log("✅ Seed concluído com sucesso!");
+    console.log('✅ Seed concluído com sucesso!');
 }
 
 main()
