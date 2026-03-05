@@ -51,7 +51,6 @@ async function main() {
                 telefone: '31987654321',
                 email: 'pedro@email.com',
                 cpf: '12345678903',
-                cep: '13273450',
                 ativo: true, // Endereço omitido para testar os campos opcionais (?)
             },
         ],
