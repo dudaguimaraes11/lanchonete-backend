@@ -71,20 +71,24 @@ async validacao(isUpdate = false) {
         });
     }
 
-    async deletar() {
-        if (!this.id) throw new Error('id necessario para deletar')
+   async deletar() {
+    if (!this.id) throw new Error('id necessario para deletar');
 
-        const pedidoAberto = await prisma.pedido.findFirst({
-            where: {
-                clienteId: this.id,
-                ativo: 'aberto',
-            },
-        });
-        if (pedidoAberto) {
-            throw new error('Não e possivel deletar um cliente que possui um pedido em aberto')
+    const pedidoAberto = await prisma.pedido.findFirst({
+        where: {
+            clienteId: this.id,
+            status: "ABERTO"
         }
-        return prisma.cliente.delete({ where: { id: this.id } });
+    });
+
+    if (pedidoAberto) {
+        throw new Error('Não é possível deletar um cliente que possui um pedido em aberto');
     }
+
+    return prisma.cliente.delete({
+        where: { id: this.id }
+    });
+}
 
     // GetAll
     static async buscarTodos(filtros = {}) {
