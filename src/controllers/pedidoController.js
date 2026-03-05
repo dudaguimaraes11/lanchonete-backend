@@ -61,7 +61,6 @@ export const atualizar = async (req, res) => {
 
         if (!pedido) return res.status(404).json({ error: 'Registro não encontrado.' });
 
-        // Correção das validações de campos
         if (req.body.clienteId !== undefined) pedido.clienteId = req.body.clienteId;
         if (req.body.total !== undefined) pedido.total = req.body.total;
         if (req.body.status !== undefined) pedido.status = req.body.status;
@@ -69,12 +68,13 @@ export const atualizar = async (req, res) => {
 
         const data = await pedido.atualizar();
 
-        res.json({ message: `O registro "${data.nome}" foi atualizado com sucesso!`, data });
+        res.json({ message: `Pedido ID ${id} atualizado com sucesso!`, data });
     } catch (error) {
         console.error('Erro ao atualizar:', error);
         res.status(500).json({ error: 'Erro ao atualizar registro.' });
     }
 };
+
 
 export const deletar = async (req, res) => {
     try {
