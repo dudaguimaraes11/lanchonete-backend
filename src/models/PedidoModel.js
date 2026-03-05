@@ -72,7 +72,7 @@ export default class Pedido {
     }
 
     async deletar() {
-        if (!this.id) throw new Error('ID não definido para exclusão.');
+        if (!this.id) throw new Error('id necessario para deletar.');
         return prisma.pedido.delete({
             where: { id: this.id },
         });

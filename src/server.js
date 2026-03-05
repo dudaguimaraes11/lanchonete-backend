@@ -2,7 +2,7 @@ import express from 'express';
 import 'dotenv/config';
 import clienteRoute from './routes/clienteRoute.js';
 import itemPedidoRoute from './routes/itemPedidoRoute.js';
-import pedidosRoute from './routes/pedidosRoute.js';
+import pedidoRoute from './routes/pedidoRoute.js';
 import produtosRoute from './routes/produtosRoute.js';
 
 const app = express();
@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 // Rotas
 app.use('/api', clienteRoute );
 app.use('/api', itemPedidoRoute );
-app.use('/api', pedidosRoute );
+app.use('/api', pedidoRoute );
 app.use('/api', produtosRoute );
 
 
