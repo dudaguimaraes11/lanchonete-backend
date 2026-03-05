@@ -34,7 +34,7 @@ export default class Pedido {
         });
 
         const novoTotal = itens.reduce((soma, item) => {
-            return soma + (Number(item.preco) * item.quantidade);
+            return soma + (Number(item.precoUnitario) * item.quantidade);
         }, 0);
 
         return prisma.pedido.update({
@@ -77,13 +77,15 @@ export default class Pedido {
             where: { id: this.id },
         });
     }
-     static async buscarTodos(filtros = {}) {
+
+    static async buscarTodos(filtros = {}) {
         const pedidos = await prisma.pedido.findMany({
             where: filtros
         });
         
         return pedidos.map(p => new Pedido(p));
     }
+
     async atualizar() {
         if (!this.id) throw new Error('ID necessário para atualização.');
         return prisma.pedido.update({
