@@ -8,25 +8,26 @@ const buscarEnderecoPorCep = async (cep) => {
 };
 
 // POST
-
 export const criar = async (req, res) => {
   try {
     const { nome, telefone, email, cpf, cep, ativo } = req.body;
 
     if (!nome)
       return res.status(400).json({ erro: "O campo 'nome' é obrigatório." });
+
     if (!telefone)
-      return res
-        .status(400)
-        .json({ erro: "O campo 'telefone' é obrigatório." });
+      return res.status(400).json({ erro: "O campo 'telefone' é obrigatório." });
+
     if (!email)
       return res.status(400).json({ erro: "O campo 'email' é obrigatório." });
+
     if (!cpf)
       return res.status(400).json({ erro: "O campo 'cpf' é obrigatório." });
 
-    let endereco = null;
+    let endereco = {};
 
     if (cep) {
+
       if (!/^\d{8}$/.test(cep)) {
         return res
           .status(400)
@@ -34,8 +35,10 @@ export const criar = async (req, res) => {
       }
 
       endereco = await buscarEnderecoPorCep(cep);
-      if (!endereco)
+
+      if (!endereco) {
         return res.status(400).json({ erro: "CEP não encontrado." });
+      }
     }
 
     const cliente = new ClienteModel({
@@ -54,11 +57,13 @@ export const criar = async (req, res) => {
     const data = await cliente.criar();
 
     return res.status(201).json(data);
+
   } catch (e) {
     console.error(e);
     return res.status(500).json({ erro: "Erro ao criar cliente." });
   }
 };
+
 
 // GET
 export const buscarTodos = async (req, res) => {
@@ -92,10 +97,10 @@ export const buscarPorId = async (req, res) => {
       return res.status(404).json({ erro: "Cliente não encontrado." });
 
     return res.status(200).json(cliente);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ erro: "Erro ao buscar cliente." });
-  }
+} catch (e) {
+  console.error(e);
+  return res.status(400).json({ erro: e.message });
+}
 };
 
 // UPDATE
@@ -111,12 +116,11 @@ export const atualizar = async (req, res) => {
 
     if (cep) {
       if (!/^\d{8}$/.test(cep)) {
-        return res
-          .status(400)
-          .json({ erro: "CEP deve conter exatamente 8 dígitos numéricos." });
+        return res.status(400).json({ erro: "CEP deve conter exatamente 8 dígitos numéricos." });
       }
 
       endereco = await buscarEnderecoPorCep(cep);
+
       if (!endereco)
         return res.status(400).json({ erro: "CEP não encontrado." });
     }
@@ -150,24 +154,28 @@ export const atualizar = async (req, res) => {
 export const deletar = async (req, res) => {
   try {
     const id = Number(req.params.id);
+
     if (isNaN(id)) {
-      return res
-        .status(400)
-        .json({ erro: "ID inválido. Informe um número válido." });
+      return res.status(400).json({ erro: "ID inválido. Informe um número válido." });
     }
+
     const cliente = await ClienteModel.buscarPorId(id);
+
     if (!cliente) {
       return res.status(404).json({ erro: "Cliente não encontrado." });
     }
+
     const data = await cliente.deletar();
-    return res
-      .status(200)
-      .json({ mensagem: "Cliente deletado com sucesso.", data });
+
+    return res.status(200).json({ mensagem: "Cliente deletado com sucesso.", data });
+
   } catch (error) {
     console.error(error);
+
     if (error.message) {
       return res.status(400).json({ erro: error.message });
     }
+
     return res.status(500).json({ erro: "Erro ao deletar cliente." });
   }
 };

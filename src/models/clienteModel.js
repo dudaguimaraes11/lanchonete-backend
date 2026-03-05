@@ -16,22 +16,42 @@ export default class Cliente {
         this.ativo = ativo;
     }
 
+// Validações 
+
 async validacao(isUpdate = false) {
-    if (!this.cpf || this.cpf.length !== 11) {
-            throw new Error('Cpf deve ter 11 digitos')
+
+    // Nome 
+
+    if (!this.nome || this.nome.length < 3 || this.nome.length > 100) {
+        throw new Error(`Nome deve ter entre 3 e 100 caracteres.`);
     }
-    if (!this.cep || this.cep.length !== 8) {
-        throw new Error('Cep deve ter 8 digitos');
+
+    // CPF 
+    if (!this.cpf || !/^\d{11}$/.test(this.cpf)) {
+    throw new Error('CPF deve conter exatamente 11 dígitos numéricos.');
     }
+
     const cpfExistente = await prisma.cliente.findMany({
         where: {
             cpf: this.cpf,
             ...(isUpdate && { id: { not: this.id } }),
         },
     });
+
     if (cpfExistente.length > 0) {
-        throw new Error('este cpf ja foi cadastrado');
+        throw new Error('Este CPF já está cadastrado.');
     }
+
+    // CEP 
+if (this.cep && !/^\d{8}$/.test(this.cep)) {
+    throw new Error('CEP deve conter exatamente 8 dígitos numéricos.');
+}
+    // Telefone 
+
+    if (!this.telefone || !/^\d{10,11}$/.test(this.telefone)) {
+            throw new Error('Telefone deve ter 10 ou 11 dígitos numéricos.');
+        }
+
     const telExistente = await prisma.cliente.findMany({
         where: {
             telefone: this.telefone,
@@ -39,15 +59,30 @@ async validacao(isUpdate = false) {
         }
     })
     if (telExistente.length > 0) {
-        throw new Error('este telefone ja foi cadastrado');
-    }
-    if (!this.logradouro || !this.localidade || !this.uf) {
-        throw new Error('dados de endereço insuficiente. Por favor verifique o cep')
-    }
+        throw new Error('Este telefone já foi cadastrado.');
     }
 
+    // Email 
+   if (!this.email || !/^\S+@\S+\.\S+$/.test(this.email)) {
+            throw new Error('Email inválido.');
+        }
+
+    const emailExistente = await prisma.cliente.findMany({
+        where: {
+            email: this.email, 
+            ...(isUpdate && { id: { not: this.id} })
+        }
+    }); 
+
+    if (emailExistente.length > 0) {
+        throw new Error(`Este email já foi cadastrado.`)
+        }
+    }
 
     async criar() {
+
+        await this.validacao(false); 
+
         return prisma.cliente.create({
             data: {
                 nome: this.nome,
@@ -65,14 +100,30 @@ async validacao(isUpdate = false) {
     }
 
     async atualizar() {
+
+        await this.validacao(true);
+
         return prisma.cliente.update({
             where: { id: this.id },
-            data: { nome: this.nome, telefone: this.telefone, email: this.email, cpf: this.cpf, cep: this.cep, logradouro: this.logradouro, bairro: this.bairro, localidade: this.localidade, uf: this.uf, ativo: this.ativo},
+            data: { 
+                nome: this.nome,
+                 telefone: this.telefone,
+                 email: this.email,
+                 cpf: this.cpf,
+                 cep: this.cep,
+                 logradouro: this.logradouro,
+                 bairro: this.bairro,
+                 localidade: this.localidade,
+                 uf: this.uf,
+                 ativo: this.ativo},
         });
     }
 
    async deletar() {
-    if (!this.id) throw new Error('id necessario para deletar');
+
+    if (!this.id) {
+        throw new Error('ID necessário para deletar.');
+    } 
 
     const pedidoAberto = await prisma.pedido.findFirst({
         where: {
@@ -82,8 +133,18 @@ async validacao(isUpdate = false) {
     });
 
     if (pedidoAberto) {
-        throw new Error('Não é possível deletar um cliente que possui um pedido em aberto');
+        throw new Error('Não é possível deletar um cliente que possui um pedido em aberto.');
     }
+
+    await prisma.itemPedido.deleteMany({
+        where: {
+            pedido: { clienteId: this.id }
+        }
+    });
+
+    await prisma.pedido.deleteMany({
+        where: { clienteId: this.id }
+    });
 
     return prisma.cliente.delete({
         where: { id: this.id }
@@ -92,25 +153,37 @@ async validacao(isUpdate = false) {
 
     // GetAll
     static async buscarTodos(filtros = {}) {
+
         const where = {};
 
         // Filtra por nome (case insensitive)
-        if (filtros.nome) where.nome = { contains: filtros.nome, mode: 'insensitive' };
+        if (filtros.nome) {
+        where.nome = { 
+            contains: filtros.nome, 
+            mode: 'insensitive' 
+    };
+}
 
         // Filtra por CPF
-        if (filtros.cpf) where.cpf = filtros.cpf;
+        if (filtros.cpf) {
+            where.cpf = filtros.cpf;
+        } 
 
         // Filtra por ativo (true or false)
-        if (filtros.ativo !== undefined) where.ativo = filtros.ativo === 'true';
-
+        if (filtros.ativo !== undefined) {
+            where.ativo = filtros.ativo === 'true';
+        } 
 
         return prisma.cliente.findMany({ where });
     }
 
     // GetById
     static async buscarPorId(id) {
+
         const data = await prisma.cliente.findUnique({ where: { id } });
+
         if (!data) return null;
+
         return new Cliente(data);
     }
 }

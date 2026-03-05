@@ -1,7 +1,7 @@
 import "dotenv/config";
 import pkg from "@prisma/client";
-// Atualizado para pegar os Enums corretos do schema: Categoria e Status
 const { PrismaClient, Categoria, Status } = pkg;
+
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
@@ -12,12 +12,11 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("🌱 Iniciando seed...");
 
-  // 🔥 Limpa tudo e reinicia os IDs corretamente
-  // Nomes exatos das tabelas geradas no PostgreSQL de acordo com os @@map e modelos
+  // limpa tabelas
   await prisma.$executeRawUnsafe(`
-        TRUNCATE TABLE "item_pedido", "pedido", "cliente", "Produto"
-        RESTART IDENTITY CASCADE;
-    `);
+    TRUNCATE TABLE "item_pedido", "pedido", "cliente", "Produto"
+    RESTART IDENTITY CASCADE;
+  `);
 
   console.log("📦 Inserindo clientes...");
   await prisma.cliente.createMany({
@@ -28,10 +27,6 @@ async function main() {
         email: "joao@email.com",
         cpf: "12345678901",
         cep: "01001000",
-        logradouro: "Praça da Sé",
-        bairro: "Sé",
-        localidade: "São Paulo",
-        uf: "SP",
         ativo: true,
       },
       {
@@ -40,22 +35,14 @@ async function main() {
         email: "maria@email.com",
         cpf: "12345678902",
         cep: "20040002",
-        logradouro: "Avenida Rio Branco",
-        bairro: "Centro",
-        localidade: "Rio de Janeiro",
-        uf: "RJ",
         ativo: true,
       },
       {
         nome: "Ana Costa",
-        telefone: "11987654321",
+        telefone: "11987654322",
         email: "ana@email.com",
         cpf: "12345678904",
         cep: "01001000",
-        logradouro: "Praça da Sé",
-        bairro: "Sé",
-        localidade: "São Paulo",
-        uf: "SP",
         ativo: true,
       },
     ],
@@ -68,28 +55,28 @@ async function main() {
         nome: "Hambúrguer Clássico",
         descricao: "Hambúrguer com queijo, alface e tomate",
         categoria: Categoria.LANCHE,
-        preco: "18.50",
+        preco: 18.5,
         disponivel: true,
       },
       {
         nome: "Refrigerante 2L",
-        descricao: "Garrafa 2 litros",
+        descricao: "Garrafa de 2 litros",
         categoria: Categoria.BEBIDA,
-        preco: "9.90",
+        preco: 9.9,
         disponivel: true,
       },
       {
         nome: "Pudim de Leite",
         descricao: "Pudim caseiro",
         categoria: Categoria.SOBREMESA,
-        preco: "7.50",
+        preco: 7.5,
         disponivel: true,
       },
       {
         nome: "Combo Burger + Refri",
         descricao: "Hambúrguer + Refrigerante",
         categoria: Categoria.COMBO,
-        preco: "25.00",
+        preco: 25.0,
         disponivel: true,
       },
     ],
@@ -100,17 +87,17 @@ async function main() {
     data: [
       {
         clienteId: 1,
-        total: "28.40",
+        total: 28.4,
         status: Status.ABERTO,
       },
       {
         clienteId: 2,
-        total: "25.00",
+        total: 25.0,
         status: Status.PAGO,
       },
       {
         clienteId: 3,
-        total: "15.00",
+        total: 15.0,
         status: Status.CANCELADO,
       },
     ],
@@ -119,34 +106,29 @@ async function main() {
   console.log("📦 Inserindo itens dos pedidos...");
   await prisma.itemPedido.createMany({
     data: [
-      // Pedido 1
       {
         pedidoId: 1,
         produtoId: 1,
         quantidade: 1,
-        precoUnitario: "18.50",
+        precoUnitario: 18.5,
       },
       {
         pedidoId: 1,
         produtoId: 2,
         quantidade: 1,
-        precoUnitario: "9.90",
+        precoUnitario: 9.9,
       },
-
-      // Pedido 2
       {
         pedidoId: 2,
         produtoId: 4,
         quantidade: 1,
-        precoUnitario: "25.00",
+        precoUnitario: 25.0,
       },
-
-      // Pedido 3
       {
         pedidoId: 3,
         produtoId: 3,
         quantidade: 2,
-        precoUnitario: "7.50",
+        precoUnitario: 7.5,
       },
     ],
   });
