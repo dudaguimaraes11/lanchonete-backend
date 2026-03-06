@@ -1,4 +1,4 @@
-import ClienteModel from "../models/clienteModel.js";
+import ClienteModel from "../models/ClienteModel.js";
 import fetch from "node-fetch";
 
 const buscarEnderecoPorCep = async (cep) => {
@@ -60,7 +60,7 @@ export const criar = async (req, res) => {
 
   } catch (e) {
     console.error("ERRO DETECTADO:", e.message);
-    return res.status(400).json({ erro: e.message }); 
+    return res.status(400).json({ erro: e.message });
   }
 };
 
@@ -146,7 +146,7 @@ export const atualizar = async (req, res) => {
     return res.status(200).json(data);
  } catch (e) {
     console.error(e);
-    return res.status(400).json({ erro: e.message }); 
+    return res.status(400).json({ erro: e.message });
   }
 };
 
