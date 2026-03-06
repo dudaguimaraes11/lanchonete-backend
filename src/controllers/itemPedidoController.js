@@ -2,17 +2,15 @@ import itemPedidoModel from '../models/itemPedidoModel.js';
 
 export const criar = async (req, res) => {
     try {
-        if (!req.body) {
-            return res.status(400).json({
-                error: 'Corpo da requisição vazio. Envie os dados!',
-            });
-        }
-        const { pedidoId, produtoId, quantidade, precoUnitario } = req.body;
+        const pedidoId = parseInt(req.params.id);
+        const { produtoId, quantidade } = req.body;
 
-        if (!pedidoId) return res.status(400).json({ error: 'O campo "pedidoId" é obrigatório!' });
-        if (!produtoId) return res.status(400).json({ error: 'O campo "produtoId" é obrigatório!' });
-        if (!precoUnitario)
-            return res.status(400).json({ error: 'O campo "precoUnitario" é obrigatório!' });
+        if (!produtoId) {
+            return res.status(400).json({ error: 'O campo "produtoId" é obrigatório!' });
+        }
+        if (!quantidade) {
+            return res.status(400).json({ error: 'O campo "quantidade" é obrigatório!' });
+        }
 
         const item = new itemPedidoModel(
             null,
@@ -24,13 +22,13 @@ export const criar = async (req, res) => {
 
         res.status(201).json({ message: 'Item criado com sucesso!', data });
     } catch (error) {
-        console.error('Erro ao criar:', error);
-        res.status(500).json({ error: 'Erro interno ao salvar o item.' });
+        res.status(400).json({ error: error.message });
     }
 };
 
 export const buscarTodos = async (req, res) => {
     try {
+
         const itemModel= new itemPedidoModel();
         const registros = await itemModel.buscarTodos(req.query);
 
@@ -46,11 +44,11 @@ export const buscarTodos = async (req, res) => {
 
 export const buscarPorId = async (req, res) => {
     try {
-        const { id } = req.params;
-        if (isNaN(id)) {
-            return res.status(400).json({ error: 'O ID enviado não é um número válido.' });
-        }
-        const itemModel = new itemPedidoModel(parseInt(id));
+        const { itemId } = req.params;
+        const idParaBuscar = itemId || req.params.id;
+
+        
+        const itemModel = new itemPedidoModel(parseInt(idParaBuscar));
         const data = await itemModel.buscarPorId();
 
         if (!data) {
@@ -81,7 +79,7 @@ export const atualizar = async (req, res) => {
         if (req.body.precoUnitario !== undefined) itemModel.precoUnitario = req.body.precoUnitario;
 
         const data = await itemModel.atualizar();
-        res.json({ message: `O registro "${data.nome}" foi atualizado com sucesso!`, data });
+        res.json({ message: `O registro "${data}" foi atualizado com sucesso!`, data });
     } catch (error) {
         console.error('Erro ao atualizar:', error);
         res.status(500).json({ error: 'Erro ao atualizar registro.' });
@@ -90,10 +88,9 @@ export const atualizar = async (req, res) => {
 
 export const deletar = async (req, res) => {
     try {
-        const { id } = req.params;
-        if (isNaN(id)) return res.status(400).json({ error: 'ID inválido.' });
+        const { itemId } = req.params;
 
-        const itemModel= new itemPedidoModel(parseInt(id));
+        const itemModel= new itemPedidoModel(parseInt(itemId));
         const exists = await itemModel.buscarPorId();
 
         if (!exists) {
@@ -101,11 +98,10 @@ export const deletar = async (req, res) => {
         }
         await itemModel.deletar();
         res.json({
-            message: `O registro "${exists.nome}" foi deletado com sucesso!`,
+            message: `O registro "${itemId}" foi deletado com sucesso!`,
             deletado: exists,
         });
     } catch (error) {
-        console.error('Erro ao deletar:', error);
-        res.status(500).json({ error: 'Erro ao deletar registro.' });
+        res.status(400).json({ error: error.message });
     }
 };
