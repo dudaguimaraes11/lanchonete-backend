@@ -19,7 +19,6 @@ export const criar = async (req, res) => {
             parseInt(pedidoId),
             parseInt(produtoId),
             parseInt(quantidade),
-            parseFloat(precoUnitario)
         );
         const data = await item.criar();
 
@@ -96,6 +95,7 @@ export const deletar = async (req, res) => {
 
         const itemModel= new itemPedidoModel(parseInt(id));
         const exists = await itemModel.buscarPorId();
+
         if (!exists) {
             return res.status(404).json({ error: 'Registro não encontrado para deletar.' });
         }

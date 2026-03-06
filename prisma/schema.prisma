@@ -68,7 +68,6 @@ model ItemPedido {
     produtoId     Int
     quantidade    Int
     precoUnitario Decimal @db.Decimal(10, 2)
-
     pedido  Pedido  @relation(fields: [pedidoId], references: [id])
     produto Produto @relation(fields: [produtoId], references: [id])
 
