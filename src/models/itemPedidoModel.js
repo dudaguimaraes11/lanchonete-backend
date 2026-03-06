@@ -12,16 +12,20 @@ export default class itemPedidoModel {
 async criar() {
 
     //Regra de negócio 1
-    if(this.quantidade <= 0) {
-        throw new Error ('A quantidade deve ser maior que 0.');
+    if(this.quantidade <= 0 || this.quantidade > 99) {
+        throw new Error ('A quantidade deve ser entre 1 e 99.');
     }
     //Regra de negócio 2
-    const produto = await prisma.produto.findUnique({
-        where: {id: this.produtoId}
-    });
+    const produto = await prisma.produto.findUnique({where: {id: this.produtoId}});
+        if(!produto) throw new Error('Produto não encontrado.');
+        if(!produto.disponivel) throw new Error('Produto indisponível no momento.');
 
-    if (!produto) {
-        throw new Error('Produto não encontrado');
+    // Verificar status do pedido 3
+
+    const pedido = await prisma.pedido.findUnique({where: {id: this.pedidoId}});
+    if(!pedido) throw new Error('Pedido não encontrado');
+    if(pedido.status !== 'ABERTO'){
+        throw new Error('Não é possível adicionar items a um pedido PAGO ou CANCELADO.')
     }
 
     const registro = await prisma.itemPedido.create({
@@ -44,8 +48,8 @@ async criar() {
         const registro = await prisma.itemPedido.findUnique({
             where: { id: this.id },
         });
-
         if (!registro) return null;
+
         this.pedidoId = registro.pedidoId;
         this.produtoId = registro.produtoId;
         this.quantidade = registro.quantidade;
@@ -75,6 +79,16 @@ async criar() {
 
     async deletar() {
         if (!this.id) throw new Error('ID não definido para exclusão.');
+
+        const itemExistente = await prisma.itemPedido.findUnique({
+            where: {id: this.id},
+            include: {pedido: true}
+        });
+
+        if(!itemExistente) throw new Error('Item não encontrado.');
+        if(itemExistente.pedido.status !== 'ABERTO'){
+            throw new Error('Não é possível remover itens de um pedido PAGO ou CANCELADO.')
+        }
         return prisma.itemPedido.delete({
             where: { id: this.id },
         });
