@@ -19,26 +19,46 @@ export default class Produto {
     }
 
     validarPreco() {
-        if (this.preco <= 0) {
-            throw new Error('O preco do produto deve ser maior que 0');
+        if (this.preco === null || this.preco === undefined || this.preco <= 0) {
+            throw new Error('O preço do produto deve ser maior que 0');
+        }
+    }
+
+    validarDescricao() {
+        if (this.descricao && this.descricao.length > 255) {
+            throw new Error('A descrição deve ter no minimo 255 caracteres');
+        }
+    }
+
+    validarCategoria() {
+        const categorias = ['LANCHE', 'BEBIDA', 'SOBREMESA', 'COMBO'];
+
+        if (!categorias.includes(this.categoria)) {
+            throw new Error('Categoria invalida');
         }
     }
 
     async criar() {
         this.validarPreco();
+        this.validarCategoria();
+        this.validarDescricao();
+
         return prisma.produto.create({
             data: {
                 nome: this.nome,
                 descricao: this.descricao,
                 categoria: this.categoria,
                 preco: this.preco,
-                ativo: this.ativo,
+                disponivel: this.disponivel,
             },
         });
     }
 
     async atualizar() {
         this.validarPreco();
+        this.validarCategoria();
+        this.validarDescricao();
+
         return prisma.produto.update({
             where: { id: this.id },
             data: {
@@ -46,7 +66,7 @@ export default class Produto {
                 descricao: this.descricao,
                 categoria: this.categoria,
                 preco: this.preco,
-                ativo: this.ativo,
+                disponivel: this.disponivel,
             },
         });
     }
@@ -57,18 +77,17 @@ export default class Produto {
                 produtos: {
                     some: { id: this.id },
                 },
-                status: 'ABERO',
+                status: 'ABERTO',
             },
         });
 
         if (pedidosVinculados.length > 0) {
-             throw new Error(
+            throw new Error(
                 'Não é possível deletar o produto porque ele está vinculado a um pedido ABERTO',
             );
         }
 
-
-        return prisma.produtos.delete({ where: { id: this.id } });
+        return prisma.produto.delete({ where: { id: this.id } });
     }
 
     // GetAll
