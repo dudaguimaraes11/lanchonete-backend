@@ -1,12 +1,7 @@
 import ClienteModel from "../models/clienteModel.js";
 import fetch from "node-fetch";
-
-const buscarEnderecoPorCep = async (cep) => {
-  const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-  const data = await response.json();
-  return data.erro ? null : data;
-};
-
+import buscarEnderecoPorCep from "../utils/viaCep.js";
+import buscarClimaPorLocalidade from "../utils/clima.js";
 // POST
 export const criar = async (req, res) => {
   try {
@@ -178,4 +173,23 @@ export const deletar = async (req, res) => {
 
     return res.status(500).json({ erro: "Erro ao deletar cliente." });
   }
+};
+export const buscarClima = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) 
+      return res.status(400).json({ erro: "ID inválido. Informe um número válido." });
+
+    const cliente = await ClienteModel.buscarPorId(id);
+    if (!cliente)      return res.status(404).json({ erro: "Cliente não encontrado." });
+    if (!cliente.localidade) 
+      return res.status(400).json({ erro: "Cliente não possui endereço cadastrado." });
+
+    const clima = await buscarClimaPorLocalidade(cliente.localidade);
+
+    return res.status(200).json({ erro: false ,localidade: cliente.localidade, clima });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: "Erro ao buscar clima para o cliente." });
+  } 
 };
