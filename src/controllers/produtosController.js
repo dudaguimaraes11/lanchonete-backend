@@ -10,15 +10,25 @@ export const criar = async (req, res) => {
 
         if (!nome) return res.status(400).json({ error: 'O campo "nome" é obrigatório!' });
 
-        if (preco === undefined || preco === null) return res.status(400).json({ error: 'O campo "preco" é obrigatório!' });
+        if (!nome || nome.length < 3) {
+            return res.status(400).json({
+                error: 'O nome deve ter no mínimo 3 caracteres',
+            });
+        }
 
+        if (preco === undefined || preco === null)
+            return res.status(400).json({ error: 'O campo "preco" é obrigatório!' });
+
+        if (!categoria) {
+            return res.status(400).json({ error: 'O campo "categoria" é obrigatório!' });
+        }
 
         const produtos = new produtosModel({
             nome,
             descricao,
             categoria,
             disponivel: disponivel === 'true' || disponivel === true,
-            preco: parseFloat(preco)
+            preco: parseFloat(preco),
         });
         const data = await produtos.criar();
 
@@ -83,9 +93,10 @@ export const atualizar = async (req, res) => {
 
         if (req.body.nome !== undefined) produtos.nome = req.body.nome;
         if (req.body.descricao !== undefined) produtos.descricao = req.body.descricao;
-        if (req.body.categoria !== undefined) produtos.categoria = req.body.preco;
+        if (req.body.categoria !== undefined) produtos.categoria = req.body.categoria;
         if (req.body.preco !== undefined) produtos.preco = parseFloat(req.body.preco);
-        if (req.body.disponivel !== undefined) produtos.disponivel = req.body.disponivel;
+        if (req.body.disponivel !== undefined)
+            produtos.disponivel = req.body.disponivel === 'true' || req.body.disponivel === true;
 
         const data = await produtos.atualizar();
 
@@ -110,7 +121,10 @@ export const deletar = async (req, res) => {
 
         await produtos.deletar();
 
-        res.json({ message: `O registro "${produtos.nome}" foi deletado com sucesso!`, deletado: produtos });
+        res.json({
+            message: `O registro "${produtos.nome}" foi deletado com sucesso!`,
+            deletado: produtos,
+        });
     } catch (error) {
         console.error('Erro ao deletar:', error);
         res.status(500).json({ error: 'Erro ao deletar registro.' });

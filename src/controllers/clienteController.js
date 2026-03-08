@@ -1,12 +1,7 @@
 import ClienteModel from "../models/ClienteModel.js";
 import fetch from "node-fetch";
-
-const buscarEnderecoPorCep = async (cep) => {
-  const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-  const data = await response.json();
-  return data.erro ? null : data;
-};
-
+import buscarEnderecoPorCep from "../utils/viaCep.js";
+import buscarClimaPorLocalidade from "../utils/clima.js";
 // POST
 export const criar = async (req, res) => {
   try {
