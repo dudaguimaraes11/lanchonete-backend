@@ -1,7 +1,7 @@
 import ClienteModel from "../models/ClienteModel.js";
-import fetch from "node-fetch";
 import buscarEnderecoPorCep from "../utils/viaCep.js";
 import buscarClimaPorLocalidade from "../utils/clima.js";
+
 // POST
 export const criar = async (req, res) => {
   try {
