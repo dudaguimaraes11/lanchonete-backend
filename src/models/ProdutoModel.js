@@ -10,12 +10,12 @@ export default class Produto {
         preco = null,
         disponivel = true,
     } = {}) {
-        this.id = id;
+        this.id = id ? Number(id) : null;
         this.nome = nome;
         this.descricao = descricao;
         this.categoria = categoria;
-        this.preco = preco;
-        this.disponivel = disponivel;
+        this.preco = preco !== null ? parseFloat(preco) : null;
+        this.disponivel = typeof disponivel === 'string' ? disponivel === 'true' : Boolean(disponivel);
     }
 
     validarPreco() {
@@ -72,23 +72,21 @@ export default class Produto {
     }
 
     async deletar() {
-        const pedidosVinculados = await prisma.pedido.findMany({
-            where: {
-                produtos: {
-                    some: { id: this.id },
-                },
-                status: 'ABERTO',
-            },
+        const pedidosVinculados = await prisma.itemPedido.findFirst({
+            where: {produtoId: this.id, pedido: { status: 'ABERTO' } },
         });
 
-        if (pedidosVinculados.length > 0) {
-            throw new Error(
-                'Não é possível deletar o produto porque ele está vinculado a um pedido ABERTO',
-            );
-        }
+        if (pedidosVinculados)
+            return {
+                status: 400,
+                error: 'Não é possivel deletar produto vinculado a pedido em aberto',
+            };
 
-        return prisma.produto.delete({ where: { id: this.id } });
+        return await prisma.produto.delete({ where: { id: this.id } });
     }
+
+
+
 
     // GetAll
     static async buscarTodos(filtros = {}) {
